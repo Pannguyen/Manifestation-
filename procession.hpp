@@ -23,9 +23,9 @@ public:
     Procession(const std::string &name);
     ~Procession();
 
+        std::string getName() const;
+        std::list<Group*> getGroups() const;
 
-    
-    string getName() const;
 
     /// @brief insertion of a Group into Procession
     /// @param group
@@ -38,7 +38,7 @@ public:
     /// @brief acces a person in Procession ////
     /// @param id identifier of the Person ///
     /// @return return person
-    Person getPerson(int id);
+    Person getPerson(int id) const;
 
     /// @brief deletion person in Procession ////
     /// @param id identifier of the Person

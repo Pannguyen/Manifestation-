@@ -3,54 +3,60 @@
 #include <iostream>
 using namespace std;
 
-Group::Group(string name, string color, int size){
-    this->name = name;
-    this->color = color;
-    this->size = size;
-    this->leader = nullptr;
-    this->last = nullptr;
+Group::Group(string name, string color, int size)
+{
+  this->name = name;
+  this->color = color;
+  this->size = size;
+  this->leader = nullptr;
+  this->last = nullptr;
 }
-
 
 int Group::getSize() const
 {
   return groupMap.size();
 }
 
-
-string Group::getName() const{
+string Group::getName() const
+{
   return this->name;
 }
 
-string Group::getColor() const{
+string Group::getColor() const
+{
   return this->color;
 }
 
-Person Group::getPerson(int id) const{
+Person Group::getPerson(int id) const
+{
   auto it = this->groupMap.find(id);
   if (it != groupMap.end())
   {
     cout << "Found person " << it->second->p.getName() << endl;
     return it->second->p;
   }
-  else{
+  else
+  {
     return Person("INEXISTANT", -1);
   }
-  
 }
 
-Person Group::getLeader() const {
-  if (leader != nullptr) {
+Person Group::getLeader() const
+{
+  if (leader != nullptr)
+  {
     cout << "Leader of group is " << leader->p.getName() << endl;
     return leader->p;
-  } else {
+  }
+  else
+  {
     throw runtime_error("Group is empty");
   }
 }
- 
 
-void Group::insertPerson(Person *person){
-  
+void Group::insertPerson(Person *person)
+{
+
   // Check if the person is already in the group
   if (groupMap.find(person->getID()) != groupMap.end())
   {
@@ -62,27 +68,27 @@ void Group::insertPerson(Person *person){
   newNode->p = *person;
   newNode->next = nullptr;
   newNode->prev = nullptr;
-    // If the linked list is empty, set the new node as both the leader and the last node
-    if (leader == nullptr)
-    {
-      leader = newNode;
-      last = newNode;
-    }
-    // insert new node to the end of linked list
-    else
-    {
-      last->next = newNode;
-      newNode->prev = last;
-      last = newNode;
-    }
+  // If the linked list is empty, set the new node as both the leader and the last node
+  if (leader == nullptr)
+  {
+    leader = newNode;
+    last = newNode;
+  }
+  // insert new node to the end of linked list
+  else
+  {
+    last->next = newNode;
+    newNode->prev = last;
+    last = newNode;
+  }
   // then, add this person in map
-groupMap.insert(std::make_pair(person->getID(), newNode));
+  groupMap.insert(make_pair(person->getID(), newNode));
 
-
-  size++; 
+  size++;
 }
 
-void Group::removePerson(int id){
+void Group::removePerson(int id)
+{
   auto it = groupMap.find(id);
   /* if id is found in map, remove it*/
   if (it != groupMap.end())
@@ -108,7 +114,7 @@ void Group::removePerson(int id){
     }
     delete nodeToRemove;
     groupMap.erase(it);
-    size--; 
+    size--;
   }
   else
   {
@@ -116,40 +122,38 @@ void Group::removePerson(int id){
   }
 }
 
-void Group::removeLeader() {
-  if (leader != nullptr) {
+void Group::removeLeader()
+{
+  if (leader != nullptr)
+  {
     Node *oldLeader = leader;
     leader = leader->next;
-    if (leader != nullptr) {
+    if (leader != nullptr)
+    {
       leader->prev = nullptr;
-    } else {
+    }
+    else
+    {
       last = nullptr;
     }
     delete oldLeader;
     std::cout << "Leader removed from the group" << std::endl;
-  } else {
+  }
+  else
+  {
     throw std::runtime_error("Group is empty");
   }
 }
 
 
-//FIX
-Group::GroupIterator Group::begin() const {
-    return GroupIterator(leader);
+Group::~Group()
+{
+  Node *current = leader;
+  while (current != nullptr)
+  {
+    Node *next = current->next;
+    delete current;
+    current = next;
+  }
+  groupMap.clear();
 }
-
-Group::GroupIterator Group::end() const {
-    return GroupIterator(nullptr);
-}
-
-
-Group::~Group() {
-  Node* current = leader;
-    while (current != nullptr) {
-        Node* next = current->next;
-        delete current;
-        current = next;
-    }
-    groupMap.clear();
-}
-
