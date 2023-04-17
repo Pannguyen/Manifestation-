@@ -3,25 +3,20 @@
 #include <iostream>
 using namespace std;
 
-Group::Group(string name, string color)
-{
-  this->name = name;
-  this->color = color;
-  this->leader = nullptr;
-  this->last = nullptr;
+Group::Group(string name, string color, int size){
+    this->name = name;
+    this->color = color;
+    this->size = size;
+    this->leader = nullptr;
+    this->last = nullptr;
 }
+
 
 int Group::getSize() const
 {
-  int size = 0;
-  Node *temp = leader;
-  while (temp != nullptr)
-  {
-    size++;
-    temp = temp->next;
-  }
-  return size;
+  return groupMap.size();
 }
+
 
 string Group::getName() const{
   return this->name;
@@ -35,35 +30,38 @@ Person Group::getPerson(int id) const{
   auto it = this->groupMap.find(id);
   if (it != groupMap.end())
   {
-    std::cout << "Found person " << it->second->p.getName() << std::endl;
+    cout << "Found person " << it->second->p.getName() << endl;
     return it->second->p;
   }
   else{
-    throw std::runtime_error("Person with id " + std::to_string(id) + " not found");
+    return Person("INEXISTANT", -1);
   }
-  // si je peux pas trouver la personne, qu'est-ce que je retourne?
+  
 }
 
-Person Group::getLeader() const{
-  auto it = groupMap.begin();
-  std::cout << "Leader of group is " << std::endl;
-  return it->second->p;
+Person Group::getLeader() const {
+  if (leader != nullptr) {
+    cout << "Leader of group is " << leader->p.getName() << endl;
+    return leader->p;
+  } else {
+    throw runtime_error("Group is empty");
+  }
 }
+ 
 
 void Group::insertPerson(Person *person){
-  // Create a new node for the person
-  Node *newNode = new Node;
-  newNode->p = *person;
-  newNode->next = nullptr;
-  newNode->prev = nullptr;
+  
   // Check if the person is already in the group
   if (groupMap.find(person->getID()) != groupMap.end())
   {
     std::cout << "Person with id " << person->getID() << " already in the group" << std::endl;
     return;
   }
-  else
-  {
+  // Create a new node for the person
+  Node *newNode = new Node;
+  newNode->p = *person;
+  newNode->next = nullptr;
+  newNode->prev = nullptr;
     // If the linked list is empty, set the new node as both the leader and the last node
     if (leader == nullptr)
     {
@@ -77,9 +75,11 @@ void Group::insertPerson(Person *person){
       newNode->prev = last;
       last = newNode;
     }
-  }
   // then, add this person in map
-  groupMap.insert({person->getID(), newNode});
+groupMap.insert(std::make_pair(person->getID(), newNode));
+
+
+  size++; 
 }
 
 void Group::removePerson(int id){
@@ -91,10 +91,12 @@ void Group::removePerson(int id){
     if (nodeToRemove == leader)
     {
       leader = leader->next;
+      leader->prev = nullptr;
     }
     if (nodeToRemove == last)
     {
       last = last->prev;
+      last->next = nullptr;
     }
     if (nodeToRemove->prev != nullptr)
     {
@@ -106,49 +108,38 @@ void Group::removePerson(int id){
     }
     delete nodeToRemove;
     groupMap.erase(it);
+    size--; 
   }
   else
   {
-    std::cout << "Person with id " << id << " not found" << std::endl;
+    cout << "Person with id " << id << " not found" << endl;
   }
 }
 
-void Group::removeLeader(){
-  for (const auto &rm : groupMap)
-  {
-    if (!groupMap.empty())
-    {
-      std::cout << " This group is empty " << std::endl;
+void Group::removeLeader() {
+  if (leader != nullptr) {
+    Node *oldLeader = leader;
+    leader = leader->next;
+    if (leader != nullptr) {
+      leader->prev = nullptr;
+    } else {
+      last = nullptr;
     }
-    else
-    {
-      if (leader != nullptr)
-      {
-        Node *oldLeader = leader;
-        leader = leader->next;
-        if (leader != nullptr)
-        {
-          leader->prev = nullptr;
-        }
-        else
-        {
-          last = nullptr;
-        }
-        delete oldLeader;
-        std::cout << "Leader removed from the group" << std::endl;
-      }
-      groupMap.erase(groupMap.begin());
-    }
+    delete oldLeader;
+    std::cout << "Leader removed from the group" << std::endl;
+  } else {
+    throw std::runtime_error("Group is empty");
   }
 }
 
-/* Group::Iterator Group::begin() const {
-  return Iterator(leader);
-} */
 
+//FIX
+Group::GroupIterator Group::begin() const {
+    return GroupIterator(leader);
+}
 
-Group::Iterator Group::end() const {
-  return Iterator(nullptr);
+Group::GroupIterator Group::end() const {
+    return GroupIterator(nullptr);
 }
 
 
@@ -161,3 +152,4 @@ Group::~Group() {
     }
     groupMap.clear();
 }
+

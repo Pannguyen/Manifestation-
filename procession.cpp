@@ -6,6 +6,11 @@ using namespace std;
 Procession::Procession(const std::string &name){
     this->name = name; 
 }
+string Procession::getName() const{
+    return this->name;
+}
+
+
 
 
 void Procession::addGroup(Group *group){

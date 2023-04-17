@@ -23,14 +23,16 @@ class Group {
     };
         std::string name;
         std::string color;
+        int size;
         Node* leader;
         Node* last;
-      
+
         //std::list<Person> peopleQ;
         std::unordered_map<int, Node* > groupMap;
 
+
     public:
-        Group(std::string name, std::string color);
+         Group(std::string name, std::string color, int size);
         ~Group();
 
         int getSize() const;
@@ -44,20 +46,21 @@ class Group {
         void removeLeader();
 
 
-        class Iterator {
+         class GroupIterator {
             private:
                 Person* current;
 
             public:
-                Iterator(Person* person);
+                GroupIterator(Node *node);
                 Person* operator*() const;
-                Iterator& operator++();
-                bool operator==(const Iterator& other) const;
-                bool operator!=(const Iterator& other) const;
+                GroupIterator& operator++();
+                bool operator==(const GroupIterator& other) const;
+                bool operator!=(const GroupIterator& other) const;
         };
 
-        Iterator begin() const;
-        Iterator end() const; 
+        GroupIterator begin() const;
+        GroupIterator end() const; 
+
 }; 
 
 

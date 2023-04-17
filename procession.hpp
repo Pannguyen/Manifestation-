@@ -23,6 +23,10 @@ public:
     Procession(const std::string &name);
     ~Procession();
 
+
+    
+    string getName() const;
+
     /// @brief insertion of a Group into Procession
     /// @param group
     void addGroup(Group *group);
