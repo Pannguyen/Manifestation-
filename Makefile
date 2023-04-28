@@ -10,7 +10,7 @@ CFLAGS  = -g -Wall -std=c++14
 INCLUDES = -I.
 LFLAGS = -lm
 
-OBJ = cortege.o couleur.o groupe.o manif.o personne.o main.o
+OBJ = procession.o couleur.o group.o demonstration.o person.o main.o
 TARGET = main
 
 all: $(TARGET)
@@ -18,23 +18,23 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 		$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) -o $(TARGET)
 
-main.o: main.cpp cortege.hpp couleur.hpp groupe.hpp manif.hpp personne.hpp
+main.o: main.cpp procession.hpp couleur.hpp group.hpp demonstration.hpp person.hpp
 		$(CC) $(CFLAGS) $(INCLUDES) -c main.cpp -o main.o
 
-cortege.o: cortege.cpp cortege.hpp personne.hpp groupe.hpp
-		$(CC) $(CFLAGS) $(INCLUDES) -c cortege.cpp -o cortege.o
+procession.o: procession.cpp procession.hpp person.hpp group.hpp
+		$(CC) $(CFLAGS) $(INCLUDES) -c procession.cpp -o procession.o
 
 couleur.o: couleur.cpp couleur.hpp
 		$(CC) $(CFLAGS) $(INCLUDES) -c couleur.cpp -o couleur.o
 
-groupe.o: groupe.cpp groupe.hpp personne.hpp
-		$(CC) $(CFLAGS) $(INCLUDES) -c groupe.cpp -o groupe.o
+group.o: group.cpp group.hpp person.hpp
+		$(CC) $(CFLAGS) $(INCLUDES) -c group.cpp -o group.o
 
-manif.o: manif.cpp manif.hpp cortege.hpp personne.hpp groupe.hpp
-		$(CC) $(CFLAGS) $(INCLUDES) -c manif.cpp -o manif.o
+demonstration.o: demonstration.cpp demonstration.hpp procession.hpp person.hpp group.hpp
+		$(CC) $(CFLAGS) $(INCLUDES) -c demonstration.cpp -o demonstration.o
 
-personne.o: personne.cpp personne.hpp groupe.hpp
-		$(CC) $(CFLAGS) $(INCLUDES) -c personne.cpp -o personne.o
+person.o: person.cpp person.hpp group.hpp
+		$(CC) $(CFLAGS) $(INCLUDES) -c person.cpp -o person.o
 
 clean:
 		rm -f *~ *.o main

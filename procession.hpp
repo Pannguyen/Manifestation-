@@ -1,99 +1,78 @@
-/*Procession <=> Cortege*/
+#include "group.hpp"
 
 #ifndef PROCESSION_HPP
 #define PROCESSION_HPP
 
-#include <vector>
 #include <list>
-#include "group.hpp"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// because We are also interested in the identification and extraction of a person knowing the identifier//
-/// in case of emergency,                                                                                 //
-/// This is the operations involve inserting or deleting elements in the middle of the structure.         //
-/// So I dicided using LINKED LIST as std::list                                                                         //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class Procession
-{
-private:
-    std::string name;
-    std::list<Group *> groups;
+/*
+Procession = Cortège, son nom est le sujet de la manifestation
+Un cortège regroupe des groupes autour d'un unique sujet
+*/
 
-public:
-    Procession(const std::string &name);
-    ~Procession();
-
-        std::string getName() const;
-        std::list<Group*> getGroups() const;
-
-
-    /// @brief insertion of a Group into Procession
-    /// @param group
-    void addGroup(Group *group);
-
-    //// @brief deletion of a Group ////
-    //// @param name of the Group ////
-    void removeGroup(const std::string &name);
-
-    /// @brief acces a person in Procession ////
-    /// @param id identifier of the Person ///
-    /// @return return person
-    Person getPerson(int id) const;
-
-    /// @brief deletion person in Procession ////
-    /// @param id identifier of the Person
-    void removePerson(int id);
-
-
-
-
-    /// @brief sorting by color of the groups ///
-    void sortColor();
-   void quickSortColor(std::list<Group*>::iterator begin, std::list<Group*>::iterator end);
-  
-    /// @brief sorting by Size of the groups ///
-    void sortSize();
-
-    // Iterators: a nested class that represents an iterator for the Procession class
-    class iterator
-    {
+class Procession {
     private:
-        std::list<Group *>::iterator group_it;
+        std::string name;
+        std::list<Group*> groups;
+
+        //Indique le nombre de personnes 
+        //au total dans le cortège
+        int size;
 
     public:
-        iterator(std::list<Group *>::iterator it) : group_it(it) {}
+        Procession(const std::string & name);
+        ~Procession();
 
-        // Opérateur de comparaison pour tester l'égalité de deux itérateurs
-        bool operator==(const iterator &other) const
-        {
-            return group_it == other.group_it;
-        }
+        int getSize() const;
+        std::string getName() const;
+        Person& getPerson(int id) const;
+        std::list<Group*> getGroups() const;
+        Group getGroup(std::string name) const;
 
-        bool operator!=(const iterator &other) const
-        {
-            return group_it != other.group_it;
-        }
+        void addGroup(Group *group);
+        void removeGroup(const std::string &name);
+        void removePerson(int id);
 
-        iterator operator++()
-        {
-            ++group_it;
-            return *this;
-        }
+        void sortColor();
+        void sortSize();
 
-        Group &operator*() const
-        {
-            return *(*group_it);
+        class ProcessIterator {
+            private:
+                std::list<Group*>::iterator group_it;
+
+            public:
+                ProcessIterator(std::list<Group*>::iterator it) : group_it(it) {}
+
+                
+                //Opérateur de comparaison pour tester l'égalité de deux itérateurs
+                bool operator==(const ProcessIterator& other) const {
+                    return group_it == other.group_it;
+                }
+
+                bool operator!=(const ProcessIterator& other) const {
+                    return group_it != other.group_it;
+                }
+
+                bool operator<(const ProcessIterator& other) const {
+                    return (*(*group_it)).getSize() < (*(*other.group_it)).getSize();
+                }
+
+                ProcessIterator operator++() {
+                    ++group_it;
+                    return *this;
+                }
+
+                Group& operator*() const {
+                    return *(*group_it);
+                }
+        };
+        // Méthode begin() pour obtenir un itérateur pointant sur le premier groupe du cortège
+        ProcessIterator begin() {
+            return ProcessIterator(groups.begin());
         }
-    };
-    // Méthode begin() pour obtenir un itérateur pointant sur le premier groupe du cortège
-    iterator begin()
-    {
-        return iterator(groups.begin());
-    }
-    // Méthode end() pour obtenir un itérateur pointant après le dernier groupe du cortège
-    iterator end()
-    {
-        return iterator(groups.end());
-    }
-};
+        // Méthode end() pour obtenir un itérateur pointant après le dernier groupe du cortège
+        ProcessIterator end() {
+            return ProcessIterator(groups.end());
+        }
+}; 
 #endif

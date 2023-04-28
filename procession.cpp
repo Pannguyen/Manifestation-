@@ -3,148 +3,206 @@
 #include <iostream>
 using namespace std;
 
-Procession::Procession(const std::string &name)
-{
+
+/*
+    Procession <=> Cortège
+*/
+
+/* 
+** @param name le sujet qui rassemble les groupes
+** @return un nouvel objet Procession c.f
+*/
+Procession::Procession(const string &name){
     this->name = name;
+    this->size = 0;
 }
 
-void Procession::addGroup(Group *group)
-{
 
-    if (groups.empty() || group->getName() < groups.front()->getName())
-    {
-        groups.push_front(group);
+//******************************************************************************************
+
+
+/* La taille du cortège correspond au nombre total de personnes
+** Le calcul est refait car on peut avoir l'addition de groupe vide
+** Donc l'attribut size reste a 0 alors qu'il y a des personnes dedans
+** @return taille du cortège
+*/
+int Procession::getSize() const {
+    int numPeople = 0;
+    for(Group *g : getGroups()) {
+        numPeople += g->getSize();
     }
-    else
-    {
-        std::list<Group *>::iterator it;
-        for (it = groups.begin(); it != groups.end(); it++)
-        {
-            if ((*it)->getName() > group->getName())
-            {
-                groups.insert(it, group);
-                break;
-            }
-        }
-        if (it == groups.end())
-        {
-            groups.push_back(group);
-        }
-    }
+
+    return numPeople;
 }
 
-void Procession::removeGroup(const std::string &name)
-{
-    for (const auto &rm : groups)
-    {
-        if (rm->getName() == name)
-        {
-        }
-    }
-}
-
-string Procession::getName() const
-{
+/* Retourner le sujet qui rassemble les groupes
+** @return le nom du cortège
+*/
+string Procession::getName() const{
     return this->name;
 }
 
-Person Procession::getPerson(int id) const
-{
+/* Rechercher la personne dans tous les groupes du cortège;
+** L'exception est levée pour chaque groupe dans lequel la personne
+** n'est pas présente. On vérifie alors qu'on a parcouru tous les
+** groupes du cortège avant de lancer une exception 'finale'
+** @param id identifiant d'une Personne
+** @return reference à la Personne recherchée
+*/
+Person& Procession::getPerson(int id) const{
 
-    for (Group *g : groups)
-    {
-        Person p = g->getPerson(id);
+    //Sert de compteur pour savoir si tout les groupe du cortege on été
+    //parcouru dans la liste groups
+    uint64_t count = 0;
 
-        if (p.getID() != -1)
-        {
-            return p;
+    //Parcours des groupes du cortège
+    for(Group *g : groups) {
+        count++;
+
+        try{
+            return g->getPerson(id);//recherche de la personne dans le groupe actuel
+
+        //L'exception est levée quand on ne trouve 
+        //pas la personne dans le groupe actuel
+        }catch(invalid_argument e) {
+
+            //Si on a parcouru tout les groupes du cortège
+            if(count >= groups.size()) {
+                break;
+            }
         }
     }
-    return Person("INEXISTANT", -1);
+
+    //Ligne atteinte seulement si la personne n'est pas trouvée dans tous les groupes
+    throw invalid_argument("Personne non présente dans le cortège");
 }
 
-list<Group *> Procession::getGroups() const
-{
-    return this->groups;
-}
+/* Accèder à tout les groupes du cortège
+** @return liste chainée de pointeurs vers Groups
+*/
+Group Procession::getGroup(string name) const {
 
-void Procession::removePerson(int id)
-{
+    if(groups.size() == 0){
+        throw logic_error("Cortège vide");
+    }
 
-    for (Group *g : groups)
-    {
-        Person p = g->getPerson(id);
-
-        if (p.getID() != -1)
-        {
-            g->removePerson(id);
-            cout << "Person removed" << endl;
-            return;
+    for(Group *g : groups) {
+        if(g->getName() == name) {
+            return *g;
         }
     }
+
+    //On atteint cette ligne uniquement quand le groupe n'est pas trouvé
+    throw invalid_argument("Groupe non présent dans le cortège");
 }
 
-void Procession::removeGroup(const std::string &name)
-{
-    for (auto it = groups.begin(); it != groups.end(); ++it)
-    {
-        if ((*it)->getName() == name)
-        {
-            delete *it; // free memory of the group being removed
+
+
+
+
+//******************************************************************************************
+
+
+/* Ajouter un groupe au cortège
+** @param group pointeur vers un objet groupe
+*/
+void Procession::addGroup(Group *group){
+    groups.push_back(group);
+    size += group->getSize();
+}
+
+
+/* Retirer et détruire un groupe du cortège
+** @param name nom du groupe à retirer
+*/
+void Procession::removeGroup(const string &name) {
+
+    if(groups.size() == 0){
+        throw logic_error("Cortège vide");
+    }
+
+    //Recherche du groupe dans le cortege par nom
+    for (auto it = groups.begin(); it != groups.end(); ++it) {
+
+        if ((*it)->getName() == name) {
+
+            //Destruction puis retrait du groupe
+            delete *it;
             groups.erase(it);
+            size -= (*it)->getSize();
+            return;
         }
     }
+
+    //Ligne atteinte dans le cas ou le nom du groupe a retirer
+    //ne correspond pas à un groupe présent dans le cortège
+    throw logic_error("Groupe non présent dans le cortège");
 }
 
+/* Retirer et détruire une personne du cortège
+** @param id l'identifiant de la personne
+*/
+void Procession::removePerson(int id){
 
-void Procession::removePerson(int id)
-{
-    for (Group *group : groups)
-    {
-        Person person = group->getPerson(id);
-        if (person.getID() == id)
-        {
-            group->removePerson(id);
+    for(Group* g : groups) {
+        Person p = g->getPerson(id);
+
+        if(p.getID() != -1){
+            g->removePerson(id);
+            cout<<"Person removed"<<endl;
+            size--;
             return;
         }
     }
 }
 
-void Procession::sortColor()
-{
-    quickSortColor(groups.begin(), groups.end());
-}
 
-void Procession::quickSortColor(std::list<Group *>::iterator begin, std::list<Group *>::iterator end)
-{
-    if (std::distance(begin, end) < 2)
-    { // base case: list is already sorted
-        return;
+//******************************************************************************************
+
+
+
+
+/* Tri rapide implémenté pour la SDC du cortège utilisée
+** @param begin iterateur vers le début
+** @param end itérateur vers la fin
+*/
+
+void Procession::sortColor() {
+
+    try {
+        //Cas de cortège vide
+        if (groups.empty()) {
+            throw runtime_error("Le Cortège est vide");
+        }
+
+        //Lambda expression : la fonction prend deux pointeurs de groupes 
+        //(gA et gB), récupère leurs couleurs respectives, et les compare.
+        groups.sort([](const Group* gA, const Group* gB) {
+            string colA = gA->getColor();
+            string colB = gB->getColor();
+          
+            //Renvoyer true si la couleur de gA précède alphabétiquement la couleur de gB
+            return colA < colB;
+        });
+
+    }catch(const runtime_error e) {
+        cout<<"erreur sortColor - "<<e.what()<<endl;
     }
-    // choose pivot element
-    std::list<Group *>::iterator pivot = std::next(begin, std::distance(begin, end) / 2);
-    // partition the list around the pivot
-    std::list<Group *>::iterator middle = std::partition(begin, end, [pivot](const Group *group)
-                                                         { return group->getColor() < (*pivot)->getColor(); });
-    // recursively sort the two partitions
-    quickSortColor(begin, middle);
-    quickSortColor(middle, end);
 }
 
-void Procession::sortSize()
-{
-    for (auto it1 = groups.begin(); it1 != groups.end(); ++it1)
+///////////////////////////////////////Mis en commentaire pour compilation
+void Procession::sortSize(){
+    for (auto it1 = groups.begin(); it1 != groups.end(); it1++)
     {
-        for (auto it2 = it1; it2 != groups.begin(); --it2)
+        for (auto it2 = it1; it2 != groups.begin(); it2--)
         {
-            if ((*it2)->getSize() > (*(std::prev(it2)))->getSize())
+            if ((*it2)->getSize() > (*(prev(it2)))->getSize())
             {
-                std::iter_swap(it2, std::prev(it2));
+                std::swap(*it2, *(std::prev(it2)));
             }
         }
     }
 }
-
 Procession::~Procession()
 {
     for (auto it = groups.begin(); it != groups.end(); ++it)

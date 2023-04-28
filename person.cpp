@@ -1,28 +1,36 @@
 #include "person.hpp"
+#include <iostream>
 
 using namespace std;
 
-Person::Person(const std::string &name, int id) : name(name), id(id), position(position) {}
-// Person::Person(const std::string &name, int id, const std::pair<int, int> &position) : name(name), id(id), position(position) {}
+/*
+    Person = Personne
+*/
+
+/* nextID permet d'affecter au préalable un identifiant unique a chaque personne
+** et a chaque construction d'un objet Person il est incrémenté
+*/
+int Person::nextID = 0;
+Person::Person(const string& name) : name(name), id(nextID), position(make_pair(-1, -1)) {nextID++;}
 
 Person::~Person() {}
 
-std::string Person::getName() const
-{
+string Person::getName() const{
     return name;
 }
 
-int Person::getID() const
-{
+int Person::getID() const{
     return id;
 }
 
-std::pair<int, int> Person::getPosition() const
-{
+pair<int, int> Person::getPosition() const{
     return position;
 }
 
-void Person::setPosition(const std::pair<int, int> &newPosition)
-{
+void Person::setPosition(const pair<int, int> & newPosition){
     position = newPosition;
 }
+
+
+
+//Person::Person(const string& name) : name(name), id(nextID), position(make_pair(-1, -1)) {nextID++;}

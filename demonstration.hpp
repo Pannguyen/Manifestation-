@@ -1,50 +1,65 @@
+#include "procession.hpp"
+#include "couleur.hpp"
+
 #ifndef DEMONSTRATION_HPP
 #define DEMONSTRATION_HPP
+
+#include <list>
 #include <vector>
-#include "procession.hpp"
 #include <string>
 
-////////////////////////////////////////////////////
-/// since we need to simulate a step where people move forward on the grid,
-/// a vector may be a better choice since we need to access elements by their position on the grid.
-////////////////////////////////////////////////////
+/*
+Demonstration = Manif est un Procession (Cortege) qui se déplace
+*/
+
+struct PersonPos {
+    int id;
+    int x, y;
+};
 
 class Demonstration {
     private:
         int width;
         int length;
-        std::vector<Procession *> processions;
-        std::string subject;
-        //Procession procession;
-        int currentStep;
-        //std::vector<Person *> leaders;
+        Procession *procession;
+
+        //Grille qui va servir de conteneur de personnes 
+        //ou de pointeurs nuls quand la personne bouge
+        std::vector<std::vector<Person *> > grid;
+        int numPeople;
+
+        //Variables permettant d'itérer selon un maximum qui varie
+        //eg. au début parcours de 3 étudiant uniquement pour une 
+        //grille 3x3 ensuite 6 etudiant puis 9 en fonction de simStage()
+        int stageCount = 1;
+        int stageCountMax;
+
+        //Pour signaler le dépassement des id présent dans le cortège
+        //et permettre de parcourir le reste de la grille 
+        bool sig = false;
+
+        //Se met a true quad la dernière rangée (du haut) est la seule
+        //ou il y a des personnes présentes
+        bool lastRowFlag = false;
+
+        //Stocker les ids et positions a "sauter" a ne pas consider lors du parcours
+        std::list<PersonPos> excludedPeople;
+        //Se met a true lors d'un removePerson
+        bool exclude;
 
     public:
-        Demonstration(std::string sub, int wid, int len);
+        Demonstration(int wid, int len, Procession *proc);
         ~Demonstration();
 
-        /// @brief  simulation of a stage ///
-        void simStage();
-
-        /// @brief test if Demo is finished //
-        /// @return false when not finished yet.
         bool hasEnded() const;
-
-        /// @brief access to a Person using its identifier
-        /// @param id
-        /// @return the person
-        Person *getPerson(int id);
-
-        /// @brief deletion of a Person using its identifier
-        /// @param id
+        Person getPerson(int id);
         void removePerson(int id);
-
-        /// @brief access to all the leaders in the process of scrolling.
-        /// @return  an array of leaders
         std::vector<Person *> getLeaders() const;
 
-        
-      
+        void updatePosition(int id);
+        void shiftPositions(int id);
+        void simStage();
+        void displayGrid();
 };
 
 #endif
